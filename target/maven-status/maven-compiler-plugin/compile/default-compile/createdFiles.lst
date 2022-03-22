@@ -1,0 +1,5 @@
+com/example/demo/entities/Suggestion.class
+com/example/demo/services/SuggestionService.class
+com/example/demo/SuggestionsApplication.class
+com/example/demo/config/SwaggerConfig.class
+com/example/demo/controller/SuggestionController.class

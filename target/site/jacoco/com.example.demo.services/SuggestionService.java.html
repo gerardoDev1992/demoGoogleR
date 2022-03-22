@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SuggestionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">suggestions</a> &gt; <a href="index.source.html" class="el_package">com.example.demo.services</a> &gt; <span class="el_source">SuggestionService.java</span></div><h1>SuggestionService.java</h1><pre class="source lang-java linenums">package com.example.demo.services;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StreamUtils;
+
+import org.springframework.web.bind.annotation.GetMapping;
+
+
+
+import com.example.demo.entities.Suggestion;
+/** Represents a Suggestion Service.
+ * @author Gerardo Leyva 
+ * @version 1.0
+*/
+
+@Service
+<span class="nc" id="L34">public class SuggestionService {</span>
+	
+
+
+    @Value(&quot;gs://spring-buckettsv-gerardodev1992/citiescanadausa.tsv&quot;)
+    private Resource gcsFile;
+    /*
+    @GetMapping
+    public String readGcsFile() throws IOException {
+        return StreamUtils.copyToString(
+            gcsFile.getInputStream(),
+            Charset.defaultCharset());
+    }*/
+
+
+
+
+<span class="nc" id="L51">	static BufferedReader reader = null;</span>
+	 /**
+     * This method convert a .tsv file to stream to manipulate the info 
+     * with this method get all necessary info
+     * @return  ArrayList posible  Suggestion
+     */	
+	public ArrayList&lt;Suggestion&gt; getCities() throws IOException {		
+<span class="nc" id="L58">		ArrayList&lt;Suggestion&gt; cities=new ArrayList&lt;Suggestion&gt;();</span>
+		try {
+				
+<span class="nc" id="L61">            String g=StreamUtils.copyToString(</span>
+<span class="nc" id="L62">			        gcsFile.getInputStream(),</span>
+<span class="nc" id="L63">			        Charset.defaultCharset());</span>
+			
+            
+
+		     
+              
+
+		      
+<span class="nc" id="L71">		      int i=0;</span>
+<span class="nc" id="L72">              String line=&quot;&quot;;</span>
+              
+<span class="nc" id="L74">              String[] tsv = g.split(&quot;\n&quot;);</span>
+	        
+<span class="nc bnc" id="L76" title="All 2 branches missed.">              for (String lenguaje: tsv) {</span>
+               
+                 
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                  if(i&gt;0) {</span>
+                            		       
+<span class="nc" id="L81">                    String[] tokens = lenguaje.split(&quot;\t&quot;);</span>
+<span class="nc" id="L82">                    Suggestion city=new Suggestion();</span>
+<span class="nc" id="L83">                    city.setName(tokens[1]+&quot;, &quot;+tokens[10]+&quot;, &quot;+tokens[8]);		        </span>
+<span class="nc" id="L84">                    city.setLatitude(Double.parseDouble(tokens[4]));</span>
+<span class="nc" id="L85">                    city.setLongitude(Double.parseDouble(tokens[5]));		        </span>
+<span class="nc" id="L86">                    cities.add(city);</span>
+                    }
+<span class="nc" id="L88">                    i++;</span>
+                  
+              }
+  
+/*
+		      while ((line = g.readLine())!= null) {
+		        
+		        if(i&gt;0) {
+		        String[] tokens = line.split(&quot;\t&quot;);		        		       
+		        Suggestion city=new Suggestion();
+		        city.setName(tokens[1]+&quot;, &quot;+tokens[10]+&quot;, &quot;+tokens[8]);		        
+		        city.setLatitude(Double.parseDouble(tokens[4]));
+		        city.setLongitude(Double.parseDouble(tokens[5]));		        
+		        cities.add(city);
+		        }
+		        i++;
+		      }
+*/		      
+<span class="nc" id="L106">		    } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L107">		      System.out.println(&quot;An error occurred.&quot;);</span>
+<span class="nc" id="L108">		      e.printStackTrace();</span>
+<span class="nc" id="L109">		    }</span>
+<span class="nc" id="L110">		return cities;</span>
+	}
+	 /**
+     * This method is for calculate the score between two points     
+     * @param oriLatitude  Double value represent a point
+     * @param oriLongitude  Double value represent a point  
+     * @param des Suggestion this object contains a posible Suggestion 
+     * @return score Double the calculated value for the Suggestion
+     */	
+	public Double score( double oriLatitude,double oriLongitude,Suggestion des) {
+<span class="nc" id="L120">		DecimalFormat df = new DecimalFormat(&quot;#.#&quot;);</span>
+<span class="nc" id="L121">		double latitud = Math.abs(des.getLatitude() - oriLatitude);</span>
+<span class="nc" id="L122">		double longi= Math.abs(des.getLongitude() - oriLongitude);</span>
+<span class="nc" id="L123">		double score = 10 - (latitud + longi) / 2;</span>
+		
+<span class="nc" id="L125">		score=score/10;</span>
+<span class="nc bnc" id="L126" title="All 4 branches missed.">	    if(score&gt;0 &amp;&amp; score&lt;=1) {</span>
+<span class="nc" id="L127">	    	score = Double.valueOf(df.format(score));		    	</span>
+	    }else {
+<span class="nc" id="L129">	    	score=0;</span>
+	    }		    		 
+<span class="nc" id="L131">	    return score;</span>
+	}
+
+	
+	 /**
+     * This method get suggestions and sort based on his score
+     * @param name String name of the posible Suggestion     
+     * @param lat  Double value represent a point
+     * @param lon  Double value represent a point   
+     * @return ass  String JSONOBject of suggestions
+     */	
+	public String scoredSuggestedMatches(String name,Double lat,Double lon) throws IOException {			
+		
+<span class="nc" id="L144">		List&lt;Suggestion&gt; filtList = getCities().stream().</span>
+<span class="nc" id="L145">		         filter(value -&gt; value.getName().toUpperCase().</span>
+<span class="nc" id="L146">		         contains(name.toUpperCase())).collect(Collectors.toList());</span>
+		
+<span class="nc" id="L148">		filtList.forEach(x-&gt;x.setScore(score(lat,lon ,x)));</span>
+		
+		
+<span class="nc" id="L151">		List&lt;Suggestion&gt; sortedList = filtList.stream()</span>
+<span class="nc" id="L152">		        .sorted(Comparator.comparingDouble(Suggestion::getScore).reversed())</span>
+<span class="nc" id="L153">		        .collect(Collectors.toList());</span>
+		
+<span class="nc" id="L155">		JSONArray arr=new JSONArray();</span>
+<span class="nc" id="L156">		JSONObject as=null;</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">		for(Suggestion suggestion : sortedList) {</span>
+<span class="nc" id="L158">			as=new JSONObject();</span>
+								
+<span class="nc" id="L160">			as.put(&quot;latitude&quot;, suggestion.getLatitude());</span>
+<span class="nc" id="L161">			as.put(&quot;longitud&quot;, suggestion.getLongitude());</span>
+<span class="nc" id="L162">			as.put(&quot;score&quot;, suggestion.getScore());</span>
+<span class="nc" id="L163">			as.put(&quot;name&quot;, suggestion.getName());	</span>
+			
+<span class="nc" id="L165">			arr.put(as);</span>
+			
+			
+<span class="nc" id="L168">		}</span>
+	
+		
+<span class="nc" id="L171">		JSONObject ass=new JSONObject();</span>
+		
+<span class="nc" id="L173">		ass.put(&quot;suggestions&quot;, arr);</span>
+		//
+		
+		
+		
+<span class="nc" id="L178">		return ass.toString();</span>
+		
+		
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

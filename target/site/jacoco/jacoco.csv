@@ -1,0 +1,6 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+suggestions,com.example.demo.controller,SuggestionController,20,0,0,0,5,0,3,0,3,0
+suggestions,com.example.demo.entities,Suggestion,28,3,0,0,12,1,8,1,8,1
+suggestions,com.example.demo.config,SwaggerConfig,35,0,0,0,9,0,3,0,3,0
+suggestions,com.example.demo.services,SuggestionService,245,0,10,0,52,0,12,0,7,0
+suggestions,com.example.demo,SuggestionsApplication,8,0,0,0,3,0,2,0,2,0
